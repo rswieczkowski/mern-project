@@ -10,13 +10,17 @@ const User = require('../models/userModel');
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
 
+  // Validation
   if (!name || !email || !password) {
     res.status(400);
-    throw new Error('Please include all required fields');
+    throw new Error('Please include all fields');
   }
 
+  // Normalize email
+  const normalizedEmail = email.toLowerCase();
+
   // Find if user already exists
-  const userExists = await User.findOne({ email });
+  const userExists = await User.findOne({ email: normalizedEmail });
 
   if (userExists) {
     res.status(400);
@@ -30,7 +34,7 @@ const registerUser = asyncHandler(async (req, res) => {
   // Create user
   const user = await User.create({
     name,
-    email,
+    email: normalizedEmail,
     password: hashedPassword,
   });
 
@@ -47,15 +51,18 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Login a new user
+// @desc    Login a user
 // @route   /api/users/login
 // @access  Public
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
+  // Normalize email
+  const normalizedEmail = email.toLowerCase();
 
-  // Check user and password match
+  const user = await User.findOne({ email: normalizedEmail });
+
+  // Check user and passwords match
   if (user && (await bcrypt.compare(password, user.password))) {
     res.status(200).json({
       _id: user._id,
@@ -65,15 +72,19 @@ const loginUser = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(401);
-    throw new Error('Invalid Credentials');
+    throw new Error('Invalid credentials');
   }
 });
 
 // @desc    Get current user
 // @route   /api/users/me
 // @access  Private
-
 const getMe = asyncHandler(async (req, res) => {
+  if (!req.user) {
+    res.status(401);
+    throw new Error('Not authorized');
+  }
+
   const user = {
     id: req.user._id,
     email: req.user.email,
@@ -84,6 +95,10 @@ const getMe = asyncHandler(async (req, res) => {
 
 // Generate token
 const generateToken = (id) => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is not defined in the environment variables');
+  }
+
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: '30d',
   });

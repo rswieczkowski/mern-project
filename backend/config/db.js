@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
+require('colors'); // Import colors for styling console logs
 
 const connectDB = async () => {
   try {
     const conn = await mongoose.connect(process.env.MONGODB_URI);
-    console.log(`MongoDB conected ${conn.connection.host}`.cyan.underline);
+    console.log(`MongoDB connected: ${conn.connection.host}`);
   } catch (error) {
-    console.log(`Error: ${error.message}`.red.underline.bold);
+    console.error(`Error: ${error.message}`);
     process.exit(1);
   }
 };
