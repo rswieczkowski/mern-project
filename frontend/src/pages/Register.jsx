@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { FaUser } from 'react-icons/fa';
 import { useSelector, useDispatch } from 'react-redux';
 import { register, reset } from '../features/auth/authSlice';
+import Spinner from '../components/Spinner';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -27,8 +28,8 @@ function Register() {
       toast.error(message);
     }
 
-    // Redirect when logged in
     if (isSuccess || user) {
+      setFormData({ name: '', email: '', password: '', password2: '' });
       navigate('/');
     }
 
@@ -57,6 +58,10 @@ function Register() {
       dispatch(register(userData));
     }
   };
+
+  if (isLoading) {
+    return <Spinner />;
+  }
 
   return (
     <>
@@ -118,7 +123,9 @@ function Register() {
             />
           </div>
           <div className='form-group'>
-            <button className='btn btn-block'>Submit</button>
+            <button type='submit' className='btn btn-block'>
+              Submit
+            </button>
           </div>
         </form>
       </section>
