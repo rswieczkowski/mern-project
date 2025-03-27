@@ -26,13 +26,14 @@ function Login() {
       toast.error(message);
     }
 
-    // Redirect when logged in
     if (isSuccess || user) {
       navigate('/');
     }
 
-    dispatch(reset());
-  }, [isError, isSuccess, user, message, navigate, dispatch]);
+    return () => {
+      dispatch(reset());
+    };
+  }, [isError, isSuccess, user, message, navigate]);
 
   const onChange = (e) => {
     setFormData((prevState) => ({
@@ -44,12 +45,12 @@ function Login() {
   const onSubmit = (e) => {
     e.preventDefault();
 
-    const userData = {
-      email,
-      password,
-    };
+    if (!email || !password) {
+      toast.error('Please enter both email and password');
+      return;
+    }
 
-    dispatch(login(userData));
+    dispatch(login({ email, password }));
   };
 
   if (isLoading) {

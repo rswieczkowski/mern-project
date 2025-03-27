@@ -1,16 +1,24 @@
+import { useEffect } from 'react';
 import { FaSignInAlt, FaSignOutAlt, FaUser } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../features/auth/authSlice';
+import { logout, reset } from '../features/auth/authSlice';
 
 function Header() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
+  const { user, isSuccess } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (isSuccess) {
+      navigate('/');
+    }
+  }, [isSuccess, navigate]);
 
   const onLogout = () => {
     dispatch(logout());
-    navigate('/');
+    dispatch(reset());
+    localStorage.removeItem('user');
   };
 
   return (
@@ -22,19 +30,19 @@ function Header() {
         {user ? (
           <li>
             <button className='btn' onClick={onLogout}>
-              <FaSignOutAlt /> Logout
+              <FaSignOutAlt /> &nbsp; Logout
             </button>
           </li>
         ) : (
           <>
             <li>
               <Link to='/login'>
-                <FaSignInAlt /> Login
+                <FaSignInAlt /> &nbsp; Login
               </Link>
             </li>
             <li>
               <Link to='/register'>
-                <FaUser /> Register
+                <FaUser /> &nbsp; Register
               </Link>
             </li>
           </>
